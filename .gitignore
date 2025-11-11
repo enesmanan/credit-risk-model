@@ -33,6 +33,7 @@ uv.lock
 data/raw/*.csv
 data/processed/*.csv
 data/samples/*.csv
+data/submissions/*.csv
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/samples/.gitkeep
