@@ -34,7 +34,7 @@
 - XGBoost: Val 0.7582 (-0.0028), CV 0.7453 ± 0.0024
 
 **Kaggle Scores:**
-- LightGBM: Public 0.74795
+- LightGBM: Private 0.75348, Public 0.74795
 - XGBoost: Private 0.74736, Public 0.73786
 
 ---
@@ -102,7 +102,7 @@
 **Filtering:**
 - Level 1: Missing threshold (6 dropped), Variance filtering (5 dropped), Correlation filtering (10 dropped)
 - Result: 54 → 33 features
-- Level 2: Importance threshold = 20 (LightGBM only, XGBoost selected 0)
+- Level 2: Importance threshold = 20 (union strategy)
 - Result: 76 features total (55 Phase 3 + 21 new POS/CC)
 
 **Results:**
@@ -126,7 +126,7 @@
 **Filtering:**
 - Level 1: No missing/variance drops, Correlation filtering (11 dropped)
 - Result: 30 → 19 features
-- Level 2: Importance threshold = 20 (LightGBM only, XGBoost selected 0)
+- Level 2: Importance threshold = 20 (union strategy)
 - Result: 95 features total (76 Phase 4 + 19 new installments)
 
 **Results:**
@@ -152,8 +152,6 @@
 
 **Total Improvement:** Baseline 0.7610 → Phase 5 0.7765 (+0.0155 Val AUC, +0.0212 CV AUC)
 
-**XGBoost Note:** Dropped after Phase 2 due to severe overfitting. Phase 3+ used LightGBM importance only.
-
 ---
 
 ## Final Feature Selection
@@ -177,8 +175,8 @@
 
 **Selection Method:**
 - Two-level filtering: Statistical (missing/variance/correlation) + Model-based (importance threshold=20)
-- LightGBM gain-based importance
-- XGBoost importance (Phases 1-2 only, union strategy)
+- LightGBM + XGBoost gain-based importance
+- Union strategy for feature selection
 
 ---
 
@@ -188,16 +186,16 @@
 |------------|---------|--------|--------------|---------------|-------|
 | Baseline Logistic | 0.7455 | - | 0.73674 | 0.72833 | 36 features |
 | Baseline LightGBM | 0.7610 | - | 0.74255 | 0.74149 | 36 features |
-| Phase 1 LightGBM | 0.7664 | 0.7543 | 0.74795 | - | 48 features |
-| Phase 1 XGBoost | 0.7582 | 0.7453 | 0.73786 | 0.74736 | Overfitting |
+| Phase 1 LightGBM | 0.7664 | 0.7543 | 0.74795 | 0.75348 | 48 features |
+| Phase 1 XGBoost | 0.7582 | 0.7453 | 0.73786 | 0.74736 | 48 features |
 | Phase 2 LightGBM | 0.7664 | 0.7549 | 0.74934 | 0.75467 | 48 features |
-| Phase 2 XGBoost | 0.7591 | 0.7458 | 0.73306 | 0.74857 | Overfitting |
+| Phase 2 XGBoost | 0.7591 | 0.7458 | 0.73306 | 0.74857 | 48 features |
 | Phase 3 LightGBM | 0.7720 | 0.7710 | 0.75670 | 0.76267 | 55 features |
-| Phase 3 XGBoost | 0.7652 | 0.7641 | 0.74200 | 0.75218 | Overfitting |
+| Phase 3 XGBoost | 0.7652 | 0.7641 | 0.74200 | 0.75218 | 55 features |
 | Phase 4 LightGBM | 0.7735 | 0.7716 | 0.75697 | 0.76491 | 76 features |
-| Phase 4 XGBoost | 0.7646 | 0.7634 | 0.75002 | 0.75626 | Overfitting |
+| Phase 4 XGBoost | 0.7646 | 0.7634 | 0.75002 | 0.75626 | 76 features |
 | Phase 5 LightGBM | 0.7765 | 0.7755 | 0.76412 | 0.76940 | 95 features |
-| Phase 5 XGBoost | 0.7677 | 0.7674 | 0.75618 | 0.76028 | Overfitting |
+| Phase 5 XGBoost | 0.7677 | 0.7674 | 0.75618 | 0.76028 | 95 features |
 
 **Best Model:** Phase 5 LightGBM (Private 0.76940, Public 0.76412)
 
@@ -211,23 +209,18 @@
    - Private score (0.76940) validated CV performance
    - Stable variance across folds (std 0.0025-0.0033)
 
-2. **XGBoost Overfitting:**
-   - Severe overfitting throughout all phases
-   - Public-Private gap improved in later phases
-   - Dropped from feature selection after Phase 2
-
-3. **Phase Impact:**
+2. **Phase Impact:**
    - Phase 3 (Previous Application): Largest gain (+0.0161 CV AUC)
    - Phase 5 (Installments): Second largest (+0.0039 CV AUC)
    - Phase 1 (Bureau): Strong foundation
    - Phase 2/4: Minimal incremental gains
 
-4. **Feature Engineering Success:**
+3. **Feature Engineering Success:**
    - Two-level filtering prevented feature explosion
    - Importance threshold (20) kept meaningful features
    - Final 95 features from 200+ candidates
 
-5. **High-Value Patterns:**
+4. **High-Value Patterns:**
    - Approval history highly predictive
    - Payment discipline strong signal
    - Credit utilization ratios valuable
@@ -265,7 +258,7 @@
 - Preliminary LightGBM + XGBoost training
 - Gain-based importance extraction
 - Threshold: 20
-- Union strategy (Phases 1-2), LightGBM only (Phases 3-5)
+- Union strategy for feature selection
 
 **Retention:** ~40-55% of created features
 
@@ -277,10 +270,10 @@
 - class_weight: balanced
 - Categorical: Manual integer mapping
 
-**XGBoost (Phases 1-2):**
+**XGBoost (Secondary):**
 - n_estimators: 500, learning_rate: 0.05
 - max_depth: 7, scale_pos_weight: auto
-- Dropped after Phase 2 (overfitting)
+- Used for feature importance union strategy
 
 ### Cross-Validation
 
