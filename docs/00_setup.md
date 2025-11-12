@@ -19,6 +19,14 @@ uv sync
 .venv\Scripts\activate
 ```
 
+### MLflow UI
+
+```bash
+uv run mlflow ui
+```
+
+Access at: http://localhost:5000
+
 ### Dependencies
 
 **Core:**
