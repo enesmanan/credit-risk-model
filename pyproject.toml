@@ -8,6 +8,7 @@ dependencies = [
     "lightgbm==4.6.0",
     "mlflow>=3.6.0",
     "numpy==1.26.4",
+    "optuna>=4.6.0",
     "pandas==2.2.3",
     "pydantic==2.11.9",
     "python-multipart>=0.0.20",
