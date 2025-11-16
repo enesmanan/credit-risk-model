@@ -35,7 +35,11 @@ async def home(request: Request):
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "model_loaded": predictor.model is not None}
+    return {
+        "status": "healthy", 
+        "model_loaded": predictor._model_loaded,
+        "model_ready": predictor.model is not None
+    }
 
 
 @app.get("/features")
