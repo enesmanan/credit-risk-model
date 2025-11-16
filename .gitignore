@@ -4,6 +4,18 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 *.egg-info/
 dist/
 build/
@@ -28,15 +40,10 @@ uv.lock
 .idea/
 *.swp
 *.swo
-
-# Data
-data/raw/*.csv
-data/processed/*.csv
-data/samples/*.csv
-data/submissions/*.csv
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/samples/.gitkeep
+.cursor/
+# OS
+.DS_Store
+Thumbs.db
 
 # Models
 models/*.pkl
@@ -66,5 +73,10 @@ Thumbs.db
 .env
 .env.local
 
-# Cursor
-.cursor/
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# UV
+uv.lock
