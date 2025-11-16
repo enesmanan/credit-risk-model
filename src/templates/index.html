@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Risk Prediction</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💳</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result {
+            display: none;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-low {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+        }
+
+        .result-medium {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+
+        .result-high {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+        }
+
+        .result-item strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .result-item span {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Credit Risk Prediction</h1>
+            <p>AI-powered credit risk assessment using LightGBM</p>
+        </div>
+
+        <div class="card">
+            <form id="predictionForm">
+                <div class="form-grid" id="featureInputs"></div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Predict Risk</button>
+                    <button type="button" class="btn btn-secondary" onclick="fillSampleData()">Fill Sample Data</button>
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Calculating risk...</p>
+            </div>
+
+            <div class="result" id="result"></div>
+        </div>
+
+        <div class="footer">
+            <p>Credit Risk Model v1.0 | 40 Features | LightGBM Classifier</p>
+        </div>
+    </div>
+
+    <script>
+        const features = {{ features | tojson }};
+        
+        function createFeatureInputs() {
+            const container = document.getElementById('featureInputs');
+            features.forEach(feature => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.innerHTML = `
+                    <label for="${feature}">${feature}</label>
+                    <input type="number" step="any" id="${feature}" name="${feature}" required>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function fillSampleData() {
+            const sampleData = {
+                'EXT_SOURCE_1': 0.5,
+                'EXT_SOURCE_3': 0.6,
+                'DAYS_BIRTH': -15000,
+                'AMT_CREDIT': 500000,
+                'AMT_ANNUITY': 25000,
+                'EXT_SOURCE_2': 0.55,
+                'AMT_GOODS_PRICE': 450000,
+                'bureau_DAYS_CREDIT_ENDDATE_max': 1000,
+                'DAYS_EMPLOYED': -2000,
+                'pos_CNT_INSTALMENT_FUTURE_mean': 10
+            };
+
+            features.forEach(feature => {
+                const input = document.getElementById(feature);
+                input.value = sampleData[feature] || 0;
+            });
+        }
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const featuresData = {};
+            
+            features.forEach(feature => {
+                featuresData[feature] = parseFloat(formData.get(feature));
+            });
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('result').classList.remove('show');
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ features: featuresData })
+                });
+
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        });
+
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            const riskPercent = (data.probability * 100).toFixed(2);
+            
+            resultDiv.className = `result result-${data.risk_level} show`;
+            resultDiv.innerHTML = `
+                <h3>${data.message}</h3>
+                <div class="result-details">
+                    <div class="result-item">
+                        <strong>Default Probability</strong>
+                        <span>${riskPercent}%</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Risk Level</strong>
+                        <span style="text-transform: uppercase;">${data.risk_level}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Features Analyzed</strong>
+                        <span>${data.features_used}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        createFeatureInputs();
+    </script>
+</body>
+</html>
